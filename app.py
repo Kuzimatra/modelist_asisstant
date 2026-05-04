@@ -2,7 +2,6 @@ import os
 import json
 import hashlib
 import secrets
-import torch
 import torch.nn as nn
 import pandas as pd
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Request
@@ -14,6 +13,8 @@ import io
 import traceback
 from datetime import datetime
 from typing import Dict, Set, List
+import torch
+torch.set_num_threads(1)
 
 print("=" * 60)
 print("🚀 ЗАПУСК ПРИЛОЖЕНИЯ")
@@ -83,7 +84,7 @@ try:
     model._fc = nn.Linear(model._fc.in_features, 12)
     if os.path.exists(MODEL_PATH):
         print(f"📦 Загрузка весов из {MODEL_PATH}...")
-        model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
+        model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
         model = model.to(device)
         model.eval()
         print("✅ Модель успешно загружена!")
