@@ -1,0 +1,32 @@
+# Виртуальное окружение
+venv/
+.venv/
+env/
+
+# Кэш Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Файлы моделей (большие)
+*.pth
+
+# Данные
+data/*.json
+gallery/*
+avatars/*
+!data/.gitkeep
+!gallery/.gitkeep
+!avatars/.gitkeep
+
+# CSV с данными
+zvezda_cached.csv
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Системные файлы
+.DS_Store
+Thumbs.db

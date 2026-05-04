@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>О проекте — ИИ-ассистент для моделистов</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <div id="toastContainer" class="toast-container"></div>
+        <div class="header"><div></div><div id="authButtons" class="auth-buttons"><button class="auth-btn" onclick="showAuthModal()">Войти</button><button class="auth-btn" onclick="showRegisterModal()">Регистрация</button></div><div id="userInfo" style="display:none;"></div></div>
+        <h1>ℹ️ О проекте</h1><div class="subtitle">ИИ-ассистент для моделистов</div>
+        <div class="nav"><a href="/">🔍 Распознавание</a><a href="/collection">📦 Коллекция</a><a href="/gallery">🎨 Галерея</a><a href="/history">📜 История</a><a href="/guide">📚 Справочник</a><a href="/about" class="active">ℹ️ О проекте</a><a href="#" id="profileNavLink" style="display:none;">👤 Профиль</a></div>
+        <div class="about-text">
+            <h3>📌 О приложении</h3>
+            <p>ИИ-ассистент для моделистов помогает распознавать модели военной техники по фотографии и находить соответствующие наборы в каталоге Звезды.</p>
+            <h3>🎯 Технологии</h3><p>• Нейросеть: EfficientNet-B4<br>• Точность: 92.64%<br>• Бэкенд: FastAPI<br>• Фронтенд: HTML/CSS/JS</p>
+            <h3>✈️ Распознаваемые классы</h3>
+            <div class="class-grid"><div class="class-item">✈️ Bf-109</div><div class="class-item">✈️ Fw-190</div><div class="class-item">✈️ Ил-2</div><div class="class-item">✈️ Spitfire</div><div class="class-item">✈️ P-51</div><div class="class-item">✈️ Су-25</div><div class="class-item">🐅 КВ-1</div><div class="class-item">🐅 Sherman</div><div class="class-item">🐅 Panther</div><div class="class-item">🐅 Т-34-85</div><div class="class-item">🐅 Т-90</div><div class="class-item">🐅 Tiger I</div></div>
+            <h3>📅 Версия</h3><p>1.0.0 — 2026</p>
+        </div>
+    </div>
+    <div id="authModal" class="auth-modal"><div class="auth-form"><button class="modal-close-btn" onclick="closeAuthModal()" type="button">✕</button><h3>Вход в аккаунт</h3><input type="text" id="loginUsername" placeholder="Имя пользователя"><div class="password-container"><input type="password" id="loginPassword" placeholder="Пароль"><button type="button" class="toggle-password" data-target="loginPassword">👁️</button></div><div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0;"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#ccc;"><input type="checkbox" id="rememberMe"> Запомнить меня</label></div><button class="auth-submit-btn" onclick="login()" type="button">Войти</button><button class="auth-secondary-btn" onclick="showRegister()" type="button">Регистрация</button></div></div>
+    <div id="registerModal" class="auth-modal" style="display:none;"><div class="auth-form"><button class="modal-close-btn" onclick="closeRegisterModal()" type="button">✕</button><h3>Регистрация</h3><input type="text" id="regUsername" placeholder="Имя пользователя"><div class="password-container"><input type="password" id="regPassword" placeholder="Пароль"><button type="button" class="toggle-password" data-target="regPassword">👁️</button></div><div class="password-hint">Пароль: не менее 10 символов, только латиница, минимум 1 заглавная буква</div><button class="auth-submit-btn" onclick="register()" type="button">Зарегистрироваться</button><button class="auth-secondary-btn" onclick="hideRegister()" type="button">Назад</button></div></div>
+    <div class="notifications-panel" id="notificationsPanel"></div>
+    <script src="/static/auth.js"></script>
+    <script>function onAuthStateChanged(a){}</script>
+</body>
+</html>

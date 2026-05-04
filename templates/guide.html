@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Справочник — ИИ-ассистент для моделистов</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <div id="toastContainer" class="toast-container"></div>
+        <div class="header"><div></div><div id="authButtons" class="auth-buttons"><button class="auth-btn" onclick="showAuthModal()">Войти</button><button class="auth-btn" onclick="showRegisterModal()">Регистрация</button></div><div id="userInfo" style="display:none;"></div></div>
+        <h1>📚 Справочник моделиста</h1><div class="subtitle">Всё, что нужно знать начинающему моделисту</div>
+        <div class="nav"><a href="/">🔍 Распознавание</a><a href="/collection">📦 Коллекция</a><a href="/gallery">🎨 Галерея</a><a href="/history">📜 История</a><a href="/guide" class="active">📚 Справочник</a><a href="/about">ℹ️ О проекте</a><a href="#" id="profileNavLink" style="display:none;">👤 Профиль</a></div>
+
+        <div class="guide-tabs">
+            <button class="guide-tab active" onclick="showTab('assembly')">🔧 Сборка</button>
+            <button class="guide-tab" onclick="showTab('painting')">🎨 Покраска</button>
+            <button class="guide-tab" onclick="showTab('decals')">🏷️ Декали</button>
+            <button class="guide-tab" onclick="showTab('diorama')">🏞️ Диорамы</button>
+            <button class="guide-tab" onclick="showTab('tools')">🛠️ Инструменты</button>
+            <button class="guide-tab" onclick="showTab('videos')">🎥 Видео-гайды</button>
+            <button class="guide-tab" onclick="showTab('links')">🔗 Ссылки</button>
+        </div>
+
+        <!-- ====== СБОРКА ====== -->
+        <div id="assembly" class="guide-content active">
+            <div class="guide-section">
+                <h3>🔧 Основы сборки масштабных моделей</h3>
+                <p>Сборка — это фундамент всего хобби. От качества сборки зависит не только внешний вид готовой модели, но и то, насколько легко будет её красить. Плохо подогнанные детали, щели и следы от литников испортят впечатление даже от самой дорогой модели.</p>
+                <h4>Подготовка рабочего места</h4>
+                <p>Прежде чем начать, организуйте удобное рабочее место. Вам понадобится:</p>
+                <ul>
+                    <li><strong>Ровная поверхность</strong> с хорошим освещением — идеально настольная лампа с дневным светом</li>
+                    <li><strong>Коврик для резки</strong> (формата А3 или А4) — защищает стол и не тупит лезвие ножа</li>
+                    <li><strong>Органайзер для деталей</strong> — подойдёт простая коробка с ячейками, чтобы не растерять мелкие детали</li>
+                    <li><strong>Пинцет</strong> — прямой и обратный (самозажимной) для удержания мелких деталей при склеивании</li>
+                </ul>
+                <h4>Инструменты для сборки</h4>
+                <ul>
+                    <li><strong>Модельный нож (скальпель)</strong> со сменными лезвиями — для отделения деталей от литника и зачистки облоя. <em>Совет:</em> меняйте лезвие как только оно затупится — тупое лезвие портит пластик</li>
+                    <li><strong>Кусачки (бокорезы)</strong> — желательно с одной плоской стороной для чистого среза. Отделяйте деталь на расстоянии 1-2 мм от неё, а остаток уже срезайте ножом</li>
+                    <li><strong>Наждачная бумага</strong> разной зернистости: 400 (грубая), 600 (средняя), 1000-1200 (мелкая), 2000 (финишная). Для удобства наклейте полоски наждачки на палочки от мороженого</li>
+                    <li><strong>Модельный клей</strong> — для обычного пластика (полистирола) используйте клей на основе бутилацетата (Tamiya Extra Thin, Revell Contacta, «Звезда»). Он расплавляет пластик и создаёт прочное соединение</li>
+                    <li><strong>Суперклей (цианоакрилат)</strong> — для деталей из смолы, фототравления и металла. Используйте гель-версию — она не растекается</li>
+                    <li><strong>Шпаклёвка</strong> — для заполнения щелей и стыков. Популярные варианты: Tamiya Basic Putty (на основе растворителя) и Vallejo Plastic Putty (водная, наносится влажной кистью)</li>
+                </ul>
+                <h4>Пошаговый процесс сборки</h4>
+                <ol>
+                    <li><strong>Изучите инструкцию.</strong> Просмотрите все шаги до конца, отметьте детали, которые нужно покрасить ДО сборки (обычно это интерьер кабины, детали двигателя)</li>
+                    <li><strong>Сверьте номера деталей на литниках с инструкцией.</strong> У каждого литника есть буквенное обозначение (A, B, C…), у каждой детали — номер</li>
+                    <li><strong>Отделите деталь кусачками</strong>, оставляя 1-2 мм от детали. Никогда не выламывайте детали руками!</li>
+                    <li><strong>Зачистите остаток литника</strong> ножом, срезая послойно, а не за один раз. Затем обработайте место наждачной бумагой</li>
+                    <li><strong>Проверьте стыкуемость «на сухую»</strong> — приложите детали друг к другу без клея. Если есть щели или несоответствия — подгоните детали</li>
+                    <li><strong>Нанесите клей.</strong> Для обычного клея — на обе поверхности. Для жидкого (Tamiya Extra Thin) — соедините детали и проведите кисточкой с клеем по стыку, клей сам затечёт в щель</li>
+                    <li><strong>Зафиксируйте детали</strong> до высыхания (1-2 минуты для жидкого клея, 10-15 минут для обычного). Используйте малярный скотч, резинки или специальные зажимы</li>
+                    <li><strong>Зашпаклюйте щели</strong> после полного высыхания клея. Нанесите шпаклёвку с избытком, дайте высохнуть и зашкурьте до гладкости</li>
+                    <li><strong>Расшивка (панельные линии).</strong> После шпаклевания некоторые линии могут быть утеряны. Восстановите их специальным скрайбером или обратной стороной лезвия</li>
+                </ol>
+                <div class="tip-box"><strong>💡 Совет новичка:</strong> Не отрезайте все детали с литников сразу! Вы рискуете перепутать похожие детали и потерять мелкие. Отделяйте только те, что нужны на текущем шаге.</div>
+                <div class="tip-box"><strong>💡 Совет продвинутого:</strong> Перед покраской обязательно вымойте собранную модель в тёплой мыльной воде (средство для посуды). Это удалит следы жира с рук и остатки разделительной смазки с производства — краска будет держаться намного лучше.</div>
+            </div>
+        </div>
+
+        <!-- ====== ПОКРАСКА ====== -->
+        <div id="painting" class="guide-content">
+            <div class="guide-section">
+                <h3>🎨 Покраска масштабных моделей</h3>
+                <p>Покраска превращает «пластиковую игрушку» в реалистичную копию. Существует три основных способа покраски: кистью, аэрографом и баллончиком. Каждый имеет свои плюсы и минусы.</p>
+                <h4>Грунтовка — обязательный этап</h4>
+                <p>Грунт выполняет три важные функции: выявляет оставшиеся дефекты сборки (царапины, щели, следы клея), улучшает сцепление краски с пластиком и создаёт единую основу для цвета. Грунтовать можно кистью, но аэрографом или баллончиком слой получается ровнее. Популярные грунты: Tamiya Surface Primer (серый, белый), Mr.Hobby Mr.Surfacer.</p>
+                <h4>Покраска кистью</h4>
+                <p>Кисть — самый доступный инструмент. Подходит для небольших деталей, интерьеров и фигурок.</p>
+                <ul>
+                    <li>Используйте <strong>качественные синтетические кисти</strong> (номера 0, 1, 3, 5). Плоская широкая — для больших поверхностей, круглая тонкая — для мелких деталей</li>
+                    <li>Разбавляйте краску до консистенции молока (примерно 1 часть воды/растворителя на 2 части краски)</li>
+                    <li>Наносите <strong>2-4 тонких слоя</strong> вместо одного толстого. Каждый слой должен полностью высохнуть (20-30 минут для акрила)</li>
+                    <li>Направление мазков — вдоль поверхности, не поперёк. Следующий слой наносите перпендикулярно предыдущему для равномерного покрытия</li>
+                    <li>Никогда не макайте кисть в баночку с краской — используйте палитру (подойдёт крышечка от бутылки или CD-диск)</li>
+                </ul>
+                <h4>Покраска аэрографом</h4>
+                <p>Аэрограф позволяет наносить идеально ровные слои, делать плавные переходы (модуляцию) и создавать эффекты теней и высветления.</p>
+                <ul>
+                    <li><strong>Давление воздуха:</strong> 1-1,5 атмосферы (15-22 PSI) для тонких работ, 2 атмосферы для грунтовки</li>
+                    <li><strong>Расстояние до модели:</strong> 10-15 см для общего покрытия, 5-7 см для тонких линий</li>
+                    <li><strong>Разбавление краски:</strong> примерно 1:1 с фирменным растворителем. Правильная консистенция — как молоко, капля должна стекать со стенки бачка, а не задерживаться</li>
+                    <li><strong>Техника «двойного действия»:</strong> сначала подайте воздух (нажмите кнопку вниз), затем постепенно отводите назад для подачи краски. Отпускайте в обратном порядке</li>
+                    <li><strong>Чистка аэрографа:</strong> после каждой смены краски продувайте растворителем. После сессии покраски — полная разборка и чистка</li>
+                </ul>
+                <div class="tip-box"><strong>💡 Совет:</strong> Не гонитесь за дорогим оборудованием сразу. Начните с бюджетного аэрографа (JAS, Fengda) с компрессором за 5000-7000 ₽. Разница между ним и «японцем» за 15000+ будет заметна только через год-два практики.</div>
+                <h4>Покраска баллончиком</h4>
+                <p>Аэрозольные краски (Tamiya TS, Mr.Hobby) — хороший компромисс между кистью и аэрографом. Дают ровное покрытие без разводов, но не позволяют делать тонкие работы.</p>
+                <ul>
+                    <li>Баллончик держите на расстоянии 20-30 см от модели</li>
+                    <li>Начинайте распыление мимо модели и проводите над ней, не останавливаясь на краях</li>
+                    <li>Наносите 2-3 тонких слоя с промежуточной сушкой 15-20 минут</li>
+                    <li>Не красьте в холодную или влажную погоду — краска может помутнеть («поседеть»)</li>
+                </ul>
+                <h4>Популярные производители красок</h4>
+                <ul>
+                    <li><strong>Tamiya (акриловые):</strong> быстро сохнут, отличная адгезия, требуют разбавления фирменным растворителем X-20A</li>
+                    <li><strong>Vallejo Model Color (акриловые):</strong> широкая палитра, удобные флаконы-капельницы, можно разбавлять водой</li>
+                    <li><strong>AK Interactive (акриловые):</strong> отличное качество, специализированные наборы под конкретную технику</li>
+                    <li><strong>«Звезда» (акриловые):</strong> доступная цена, неплохое качество для начала</li>
+                    <li><strong>Hataka Hobby (акриловые):</strong> готовые цветовые наборы для конкретных армий и периодов</li>
+                </ul>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Airbrush_airbrush_gun.jpg/800px-Airbrush_airbrush_gun.jpg" alt="Аэрограф" class="demo-image">
+                <p style="color:#aaa;font-size:0.85rem;">Двухпозиционный аэрограф с верхним бачком — наиболее распространённый тип для моделизма</p>
+            </div>
+        </div>
+
+        <!-- ====== ДЕКАЛИ ====== -->
+        <div id="decals" class="guide-content">
+            <div class="guide-section">
+                <h3>🏷️ Нанесение декалей (переводных наклеек)</h3>
+                <p>Декали — это тончайшая плёнка с напечатанным изображением, которая переносится на модель с помощью воды. От качества нанесения декалей зависит реалистичность модели: опознавательные знаки, бортовые номера, эмблемы, технические надписи.</p>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Decal_sheet_for_model_tank.jpg/800px-Decal_sheet_for_model_tank.jpg" alt="Декали" class="demo-image">
+                <p style="color:#aaa;font-size:0.85rem;">Пример листа с декалями для модели танка — обратите внимание на подложку (синюю бумагу)</p>
+                <h4>Почему декали «серебрятся»?</h4>
+                <p>Главная проблема новичков — «серебрение» декалей. Под плёнкой остаются микроскопические пузырьки воздуха, которые на свету выглядят как серебристый налёт. Причина — матовая поверхность краски. Решение — <strong>глянцевый лак</strong> перед нанесением декалей. Ровная глянцевая поверхность не оставляет места для воздуха под декалью.</p>
+                <h4>Необходимые материалы</h4>
+                <ul>
+                    <li><strong>Глянцевый лак</strong> (Tamiya X-22, будущий пол, Mr.Hobby Gloss) — наносится на места, куда будут клеиться декали</li>
+                    <li><strong>Тёплая вода</strong> (30-40°C) — в холодной воде декаль отходит дольше, в горячей может свернуться</li>
+                    <li><strong>Специальная жидкость для декалей:</strong></li>
+                    <ul>
+                        <li><em>Decal Set</em> (Micro Set, Mr.Mark Setter) — наносится на модель перед декалью, улучшает прилегание</li>
+                        <li><em>Decal Soft</em> (Micro Sol, Mr.Mark Softer) — размягчает декаль, позволяя ей «обтянуть» неровности (заклёпки, расшивку, люки)</li>
+                    </ul>
+                    <li><strong>Ватные палочки</strong> — для удаления лишней воды и прижимания декали</li>
+                    <li><strong>Мягкая ткань или бумажная салфетка</strong> — для промакивания</li>
+                    <li><strong>Пинцет с плоскими губками</strong> — для удержания декали (не острый, чтобы не порвать)</li>
+                </ul>
+                <h4>Пошаговый процесс нанесения</h4>
+                <ol>
+                    <li><strong>Нанесите глянцевый лак</strong> на всю поверхность, куда будут клеиться декали. Дайте полностью высохнуть (2-3 часа). Без этого шага декали почти гарантированно «посеребрят»</li>
+                    <li><strong>Вырежьте нужную декаль</strong> из листа маникюрными ножницами или острым ножом, отступая 1-2 мм от края изображения</li>
+                    <li><strong>Опустите декаль в тёплую воду</strong> на 15-30 секунд. Не передерживайте — декаль может свернуться или отделиться от подложки прямо в воде</li>
+                    <li>Пока декаль отмокает, <strong>кисточкой нанесите Decal Set</strong> на место приклеивания на модели</li>
+                    <li><strong>Проверьте готовность:</strong> аккуратно подтолкните декаль на подложке пальцем — если она сдвигается, значит готова</li>
+                    <li><strong>Перенесите декаль:</strong> приложите подложку к модели и аккуратно сдвиньте декаль с подложки кисточкой или ватной палочкой прямо на модель</li>
+                    <li><strong>Скорректируйте положение</strong> влажной кисточкой, пока декаль не высохла (у вас есть 1-2 минуты)</li>
+                    <li><strong>Удалите лишнюю воду</strong> — аккуратно прокатайте ватной палочкой от центра к краям, выгоняя воду и пузырьки воздуха</li>
+                    <li><strong>Нанесите Decal Soft</strong> поверх декали. Не трогайте её после этого! Декаль сморщится — это нормально. Через 15-30 минут она расправится и «обтянет» все неровности</li>
+                    <li><strong>После полного высыхания</strong> (3-4 часа) покройте модель матовым или полуматовым лаком. Это скроет границы декали и придаст общий финишный вид</li>
+                </ol>
+                <div class="tip-box"><strong>💡 Совет:</strong> Если декаль всё же «посеребрила» (видны пузырьки воздуха) — аккуратно проколите проблемное место острой иглой и снова нанесите Decal Soft. Он затечёт под плёнку и «приклеит» её.</div>
+                <div class="tip-box"><strong>💡 Совет:</strong> Крупные декали (на весь борт самолёта или танка) удобнее наносить вдвоём: один держит пинцетом край декали, второй кисточкой сдвигает с подложки.</div>
+            </div>
+        </div>
+
+        <!-- ====== ДИОРАМЫ ====== -->
+        <div id="diorama" class="guide-content">
+            <div class="guide-section">
+                <h3>🏞️ Создание диорам и виньеток</h3>
+                <p>Диорама — это трёхмерная композиция, изображающая сцену с моделями в естественном окружении. От простой «подставки» диорама отличается тем, что <strong>рассказывает историю</strong> — у неё есть сюжет, настроение, время года и место действия.</p>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Stalingrad_battle_diorama_at_the_great_patriotic_war_museum.jpg/800px-Stalingrad_battle_diorama_at_the_great_patriotic_war_museum.jpg" alt="Диорама" class="demo-image">
+                <p style="color:#aaa;font-size:0.85rem;">Пример масштабной диорамы, воссоздающей сцену городского боя</p>
+                <h4>Планирование диорамы</h4>
+                <p>Прежде чем браться за инструменты, ответьте на несколько вопросов:</p>
+                <ul>
+                    <li><strong>Какую историю вы рассказываете?</strong> Танк на марше? Привал экипажа? Боевая сцена? Брошенная техника?</li>
+                    <li><strong>Какое время года и суток?</strong> Зимний лес требует снега и голых деревьев, летнее поле — травы и пыли</li>
+                    <li><strong>Какой масштаб?</strong> Все элементы должны быть в одном масштабе с моделью. Нельзя поставить дерево из 1:72 рядом с танком 1:35</li>
+                    <li><strong>Соответствует ли всё историческому контексту?</strong> Т-34 не мог стоять рядом с «Абрамсом», а зимняя форма солдат не к месту в африканском пейзаже</li>
+                </ul>
+                <h4>Основные компоненты диорамы</h4>
+                <ul>
+                    <li><strong>Основание (подмакетник).</strong> Деревянная рамка (подойдёт фоторамка, перевёрнутая обратной стороной), пенопласт, фанера. Края можно зашпаклевать и покрасить в чёрный или коричневый цвет — это придаёт законченный вид</li>
+                    <li><strong>Рельеф.</strong> Моделируется из экструдированного пенопласта (пеноплекс), строительной пены или гипса. Для имитации неровностей почвы используйте папье-маше или структурную пасту</li>
+                    <li><strong>Земля и грунт.</strong> Простейший вариант — просеянный песок или молотый кофе, приклеенные на ПВА. Более продвинутый — пигменты и текстурные пасты от AK Interactive или Vallejo</li>
+                    <li><strong>Трава.</strong> Флоки (мелкая текстура) приклеиваются на ПВА. Для высокой травы используйте статическую траву (наносится специальным аппликатором — она «встаёт» вертикально под действием статического электричества)</li>
+                    <li><strong>Деревья и кусты.</strong> Готовые наборы от Woodland Scenics, MiniNatur. Можно сделать самому: проволочный каркас, обмазанный шпаклёвкой (ствол), и губка, пропитанная клеем и обсыпанная флоками (крона)</li>
+                    <li><strong>Вода.</strong> Имитируется эпоксидной смолой или специальными гелями (AK Water Gel, Vallejo Still Water). Для луж и ручьёв достаточно 2-3 слоёв глянцевого лака поверх окрашенного дна</li>
+                    <li><strong>Здания и руины.</strong> Пенокартон, гипс, готовые наборы (MiniArt, Italeri). Кирпичную кладку можно имитировать продавливанием линий по сырому гипсу</li>
+                    <li><strong>Фигурки людей и животных.</strong> Добавляют масштаб и «оживляют» сцену. Важно: поза и экипировка фигурок должны соответствовать сюжету</li>
+                </ul>
+                <h4>Порядок создания диорамы</h4>
+                <ol>
+                    <li>Выберите исторический сюжет и найдите референсы — фотографии реальной местности, техники</li>
+                    <li>Создайте эскиз (хотя бы от руки) — расположение объектов, направление взгляда зрителя</li>
+                    <li>Сформируйте рельеф основания</li>
+                    <li>Покрасьте основание в базовый цвет (коричневый для земли, серый для бетона)</li>
+                    <li>Нанесите текстуру земли (смесь ПВА, песка и краски)</li>
+                    <li>Добавьте растительность — от крупных элементов (деревья) к мелким (трава)</li>
+                    <li>Разместите модель и фигурки, временно закрепив (чтобы можно было подвигать)</li>
+                    <li>Добавьте мелкие детали: ящики, бочки, оружие, гильзы, следы колёс и гусениц</li>
+                    <li>Нанесите финальные эффекты: пыль, грязь, копоть (пигменты и аэрограф)</li>
+                </ol>
+                <div class="tip-box"><strong>💡 Совет новичка:</strong> Начните с маленькой виньетки (10×15 см) с одной моделью и простым основанием. Так вы освоите базовые техники и не перегорите от объёма работы.</div>
+                <div class="tip-box"><strong>💡 Совет:</strong> Всегда проверяйте, что все элементы диорамы соответствуют одному масштабу и историческому периоду. Это самая частая ошибка новичков.</div>
+            </div>
+        </div>
+
+        <!-- ====== ИНСТРУМЕНТЫ ====== -->
+        <div id="tools" class="guide-content">
+            <div class="guide-section">
+                <h3>🛠️ Базовый набор инструментов моделиста</h3>
+                <p>Многие новички совершают ошибку — покупают дорогую модель, но экономят на инструментах. Результат: испорченный пластик и разочарование. Хороший инструмент прослужит вам годы, даже десятилетия.</p>
+                <h4>Стартовый набор (обязательный минимум)</h4>
+                <div class="tool-grid">
+                    <div class="tool-card"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Side_cutters.jpg/800px-Side_cutters.jpg" alt="Кусачки"><div class="tool-name">Кусачки (бокорезы)</div><div class="tool-price">300-600 ₽</div></div>
+                    <div class="tool-card"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Cutter_X-Acto.jpg/800px-Cutter_X-Acto.jpg" alt="Модельный нож"><div class="tool-name">Модельный нож</div><div class="tool-price">200-400 ₽</div></div>
+                    <div class="tool-card"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Sandpaper.jpg/800px-Sandpaper.jpg" alt="Наждачная бумага"><div class="tool-name">Наждачная бумага</div><div class="tool-price">100-200 ₽</div></div>
+                    <div class="tool-card"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Tweezers.jpg/800px-Tweezers.jpg" alt="Пинцет"><div class="tool-name">Пинцет</div><div class="tool-price">150-300 ₽</div></div>
+                    <div class="tool-card"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Paint_brushes.jpg/800px-Paint_brushes.jpg" alt="Кисти"><div class="tool-name">Набор кистей</div><div class="tool-price">300-600 ₽</div></div>
+                </div>
+                <h4 style="margin-top:20px;">Что докупить позже (по мере увлечения)</h4>
+                <ul>
+                    <li><strong>Аэрограф с компрессором</strong> — от 5000 ₽ (JAS, Fengda) до 20000+ ₽ (Iwata, Harder & Steenbeck)</li>
+                    <li><strong>Шпаклёвка</strong> — 200-400 ₽ за тюбик (Tamiya, Vallejo)</li>
+                    <li><strong>Малярный скотч</strong> — 100-200 ₽, незаменим для масок при покраске</li>
+                    <li><strong>Смывка и фильтры</strong> — от 300 ₽ за флакон (Tamiya Panel Line Accent, AK Interactive)</li>
+                    <li><strong>Скрайбер (восстановитель расшивки)</strong> — 300-500 ₽</li>
+                    <li><strong>Коврик для резки</strong> — 500-1000 ₽, формат А3 — оптимально</li>
+                    <li><strong>Сверлильный инструмент (пин-визе)</strong> — 300-600 ₽, для рассверливания стволов и мелких отверстий</li>
+                </ul>
+                <div class="tip-box"><strong>💡 Совет:</strong> Не экономьте на кусачках и ноже. Это два самых важных инструмента. Плохие кусачки мнут пластик, плохой нож рвёт его. Хороший инструмент окупается первыми же собранными моделями без испорченных деталей.</div>
+            </div>
+        </div>
+
+        <!-- ====== ВИДЕО ====== -->
+        <div id="videos" class="guide-content">
+            <div class="guide-section"><h3>🎥 Видео-гайды для начинающих</h3><p>Подборка полезных видеоуроков по сборке и покраске моделей от опытных моделистов.</p>
+                <div class="video-grid">
+                    <div class="video-card"><iframe src="https://www.youtube.com/embed/I1rOCWDlmX8" allowfullscreen></iframe><div class="video-info"><div class="video-title">Сборка Т-34/85 от «Звезды»</div><div class="video-channel">Канал «Моделизм для всех»</div></div></div>
+                    <div class="video-card"><iframe src="https://www.youtube.com/embed/rj4dkibVjtI" allowfullscreen></iframe><div class="video-info"><div class="video-title">Покраска кистью без разводов</div><div class="video-channel">Канал «Scale Models»</div></div></div>
+                    <div class="video-card"><iframe src="https://www.youtube.com/embed/jG_IohreFS4" allowfullscreen></iframe><div class="video-info"><div class="video-title">Как клеить декали: полный гайд</div><div class="video-channel">Канал «Хобби-мастер»</div></div></div>
+                    <div class="video-card"><iframe src="https://www.youtube.com/embed/tRe4B293BWk" allowfullscreen></iframe><div class="video-info"><div class="video-title">Создание диорамы с нуля</div><div class="video-channel">Канал «Мир моделизма»</div></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== ССЫЛКИ ====== -->
+        <div id="links" class="guide-content">
+            <div class="guide-section"><h3>🔗 Полезные ссылки</h3>
+                <a href="https://scalemodels.ru" target="_blank" class="link-card"><div class="link-icon">🇷🇺</div><div class="link-info"><h4>Scalemodels.ru</h4><p>Крупнейший русскоязычный форум моделистов. Обсуждения, статьи, галерея работ</p></div></a>
+                <a href="https://karopka.ru" target="_blank" class="link-card"><div class="link-icon">📦</div><div class="link-info"><h4>Каропка.ру</h4><p>Каталог наборов с обзорами, галерея готовых работ, тематические статьи</p></div></a>
+                <a href="https://www.scalemates.com" target="_blank" class="link-card"><div class="link-icon">🌍</div><div class="link-info"><h4>Scalemates</h4><p>Международный каталог наборов и аксессуаров. Удобный поиск, таймлайн выхода наборов</p></div></a>
+                <a href="https://zvezda.org.ru" target="_blank" class="link-card"><div class="link-icon">⭐</div><div class="link-info"><h4>Звезда</h4><p>Официальный сайт российского производителя. Каталог, инструкции, новинки</p></div></a>
+                <a href="https://www.reddit.com/r/modelmakers" target="_blank" class="link-card"><div class="link-icon">💬</div><div class="link-info"><h4>r/modelmakers (Reddit)</h4><p>Крупнейшее англоязычное сообщество. Отличный источник вдохновения и советов</p></div></a>
+            </div>
+        </div>
+    </div>
+
+    <div id="authModal" class="auth-modal"><div class="auth-form"><button class="modal-close-btn" onclick="closeAuthModal()" type="button">✕</button><h3>Вход в аккаунт</h3><input type="text" id="loginUsername" placeholder="Имя пользователя"><div class="password-container"><input type="password" id="loginPassword" placeholder="Пароль"><button type="button" class="toggle-password" data-target="loginPassword">👁️</button></div><div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0;"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#ccc;"><input type="checkbox" id="rememberMe"> Запомнить меня</label></div><button class="auth-submit-btn" onclick="login()" type="button">Войти</button><button class="auth-secondary-btn" onclick="showRegister()" type="button">Регистрация</button></div></div>
+    <div id="registerModal" class="auth-modal" style="display:none;"><div class="auth-form"><button class="modal-close-btn" onclick="closeRegisterModal()" type="button">✕</button><h3>Регистрация</h3><input type="text" id="regUsername" placeholder="Имя пользователя"><div class="password-container"><input type="password" id="regPassword" placeholder="Пароль"><button type="button" class="toggle-password" data-target="regPassword">👁️</button></div><div class="password-hint">Пароль: не менее 10 символов, только латиница, минимум 1 заглавная буква</div><button class="auth-submit-btn" onclick="register()" type="button">Зарегистрироваться</button><button class="auth-secondary-btn" onclick="hideRegister()" type="button">Назад</button></div></div>
+    <div class="notifications-panel" id="notificationsPanel"></div>
+    <script src="/static/auth.js"></script>
+    <script>
+        function showTab(id){document.querySelectorAll('.guide-content').forEach(e=>e.classList.remove('active'));document.querySelectorAll('.guide-tab').forEach(e=>e.classList.remove('active'));document.getElementById(id).classList.add('active');event.target.classList.add('active');}
+        function onAuthStateChanged(a){}
+    </script>
+</body>
+</html>

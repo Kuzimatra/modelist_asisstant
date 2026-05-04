@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Коллекция — ИИ-ассистент для моделистов</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .status-select { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 10px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; margin-top: 8px; width: 100%; }
+        .status-select option { background: #1a1a2e; }
+        .status-label { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
+        .status-queue { background: rgba(255,255,255,0.1); color: #aaa; } .status-building { background: rgba(68,136,255,0.2); color: #4488ff; }
+        .status-painting { background: rgba(233,69,96,0.2); color: #e94560; } .status-decals { background: rgba(255,170,0,0.2); color: #ffaa00; }
+        .status-finishing { background: rgba(0,255,136,0.2); color: #00ff88; } .status-done { background: rgba(0,255,136,0.3); color: #00ff88; }
+        .status-abandoned { background: rgba(255,68,68,0.2); color: #ff4444; }
+        .progress-tracker { margin-bottom: 30px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .stat-mini { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 14px; text-align: center; }
+        .stat-mini-value { font-size: 1.8rem; font-weight: bold; color: #fff; }
+        .stat-mini-label { font-size: 0.75rem; color: #aaa; text-transform: uppercase; }
+        .instructions-library { margin-top: 40px; }
+        .instructions-search { display: flex; gap: 10px; margin-bottom: 20px; }
+        .instructions-search input { flex: 1; padding: 10px 16px; border-radius: 30px; border: none; background: rgba(255,255,255,0.1); color: #fff; }
+        .instructions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+        .instruction-card { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; border: 1px solid rgba(255,255,255,0.08); transition: all 0.2s; }
+        .instruction-card:hover { background: rgba(255,255,255,0.08); border-color: rgba(68,136,255,0.3); }
+        .instruction-card h4 { color: #ff6b6b; margin-bottom: 6px; font-size: 0.95rem; }
+        .instruction-card p { color: #aaa; font-size: 0.8rem; margin-bottom: 8px; }
+        .instruction-card a { color: #4488ff; text-decoration: none; font-size: 0.85rem; }
+        .instruction-card a:hover { text-decoration: underline; }
+
+        .checklist-panel { margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; display: none; }
+        .checklist-panel.active { display: block; }
+        .checklist-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; color: #ccc; font-size: 0.85rem; }
+        .checklist-item input[type="checkbox"] { accent-color: #e94560; }
+        .checklist-item.done { color: #00ff88; text-decoration: line-through; }
+        .checklist-toggle { background: transparent; border: none; color: #ff6b6b; cursor: pointer; font-size: 0.85rem; margin-top: 5px; }
+
+        .bookmark-btn { background: transparent; border: none; color: #888; cursor: pointer; font-size: 1.2rem; transition: all 0.2s; padding: 0 5px; }
+        .bookmark-btn:hover { color: #ffaa00; transform: scale(1.2); }
+        .bookmark-btn.active { color: #ffaa00; }
+
+        .scale-calc { background: rgba(255,255,255,0.05); border-radius: 16px; padding: 25px; margin-top: 40px; border: 1px solid rgba(255,255,255,0.08); }
+        .scale-calc h3 { color: #ff6b6b; margin-bottom: 15px; }
+        .scale-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: end; }
+        .scale-row input, .scale-row select { padding: 10px; border-radius: 8px; border: none; background: rgba(255,255,255,0.1); color: #fff; margin-top: 5px; }
+        .scale-row label { color: #aaa; font-size: 0.85rem; display: block; }
+        .scale-btn { background: #e94560; border: none; padding: 10px 20px; border-radius: 30px; color: white; cursor: pointer; }
+        .scale-result { color: #00ff88; font-size: 1.2rem; margin-left: 10px; }
+
+        .multi-upload-section { margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 12px; display: none; }
+        .multi-upload-section.active { display: block; }
+        .multi-upload-section h4 { color: #ff6b6b; margin-bottom: 10px; }
+        .multi-upload-section input[type="file"] { display: none; }
+        .multi-upload-section .file-label { background: rgba(255,255,255,0.1); border: 2px dashed rgba(255,255,255,0.3); padding: 20px; text-align: center; border-radius: 8px; cursor: pointer; color: #aaa; }
+        .multi-upload-section .preview-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .multi-upload-section .preview-grid img { width: 80px; height: 60px; object-fit: cover; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="toastContainer" class="toast-container"></div>
+        <div class="header"><div></div><div id="authButtons" class="auth-buttons"><button class="auth-btn" onclick="showAuthModal()">Войти</button><button class="auth-btn" onclick="showRegisterModal()">Регистрация</button></div><div id="userInfo" style="display:none;"></div></div>
+        <h1>📦 Моя коллекция</h1><div class="subtitle">Сохранённые наборы и прогресс сборки</div>
+        <div class="nav"><a href="/">🔍 Распознавание</a><a href="/collection" class="active">📦 Коллекция</a><a href="/gallery">🎨 Галерея</a><a href="/history">📜 История</a><a href="/guide">📚 Справочник</a><a href="/about">ℹ️ О проекте</a><a href="#" id="profileNavLink" style="display:none;">👤 Профиль</a></div>
+        <div id="collectionContent"></div>
+        <div class="instructions-library" id="instructionsLibrary"><h3 style="color:#ff6b6b;margin-bottom:15px;">📚 Библиотека инструкций</h3><p style="color:#aaa;margin-bottom:15px;">Поиск по всем наборам из каталога</p><div class="instructions-search"><input type="text" id="instructionsSearch" placeholder="🔍 Поиск по названию или артикулу..." oninput="searchInstructions()"></div><div class="instructions-grid" id="instructionsGrid"></div></div>
+        <div class="scale-calc"><h3>📐 Калькулятор масштаба</h3><div class="scale-row"><div><label>Реальный размер (метры)</label><input type="number" id="realSize" placeholder="6.8" step="0.01" style="width:200px;"></div><div><label>Масштаб</label><select id="scaleSelect"><option value="35">1:35</option><option value="48">1:48</option><option value="72">1:72</option><option value="100">1:100</option><option value="144">1:144</option><option value="350">1:350</option></select></div><button class="scale-btn" onclick="calculateScale()">Рассчитать</button><span class="scale-result" id="scaleResult"></span></div></div>
+    </div>
+
+    <div id="authModal" class="auth-modal"><div class="auth-form"><button class="modal-close-btn" onclick="closeAuthModal()" type="button">✕</button><h3>Вход в аккаунт</h3><input type="text" id="loginUsername" placeholder="Имя пользователя"><div class="password-container"><input type="password" id="loginPassword" placeholder="Пароль"><button type="button" class="toggle-password" data-target="loginPassword">👁️</button></div><div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0;"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#ccc;"><input type="checkbox" id="rememberMe"> Запомнить меня</label></div><button class="auth-submit-btn" onclick="login()" type="button">Войти</button><button class="auth-secondary-btn" onclick="showRegister()" type="button">Регистрация</button></div></div>
+    <div id="registerModal" class="auth-modal" style="display:none;"><div class="auth-form"><button class="modal-close-btn" onclick="closeRegisterModal()" type="button">✕</button><h3>Регистрация</h3><input type="text" id="regUsername" placeholder="Имя пользователя"><div class="password-container"><input type="password" id="regPassword" placeholder="Пароль"><button type="button" class="toggle-password" data-target="regPassword">👁️</button></div><div class="password-hint">Пароль: не менее 10 символов, только латиница, минимум 1 заглавная буква</div><button class="auth-submit-btn" onclick="register()" type="button">Зарегистрироваться</button><button class="auth-secondary-btn" onclick="hideRegister()" type="button">Назад</button></div></div>
+    <div class="notifications-panel" id="notificationsPanel"></div>
+    <script src="/static/auth.js"></script>
+    <script>
+        var allKits = [], collectionData = [], bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+
+        function onAuthStateChanged(a) { if (a) { loadCollection(); loadAllKits(); } else document.getElementById('collectionContent').innerHTML = '<div class="auth-required"><div class="auth-required-icon">🔒</div><h3>Требуется авторизация</h3><button onclick="showAuthModal()">Войти</button></div>'; }
+        async function loadAllKits() { try { var r = await fetch('/api/kits/all'); if (r.ok) allKits = await r.json(); } catch (e) { allKits = []; } renderInstructions(allKits); }
+
+        function showConfirm(title, message, onYes) { var o = document.createElement('div'); o.className = 'confirm-overlay'; o.innerHTML = '<div class="confirm-box"><h3>' + title + '</h3><p>' + message + '</p><button class="confirm-yes">Да</button><button class="confirm-no">Отмена</button></div>'; document.body.appendChild(o); o.querySelector('.confirm-yes').onclick = function() { o.remove(); onYes(); }; o.querySelector('.confirm-no').onclick = function() { o.remove(); }; }
+
+        async function loadCollection() {
+            if (!currentToken) return;
+            var r = await fetch('/api/collection?token=' + currentToken);
+            collectionData = (await r.json()) || [];
+            var c = document.getElementById('collectionContent');
+            if (!collectionData.length) { c.innerHTML = '<div class="empty-collection">📭 Коллекция пуста</div>'; return; }
+            var stats = { queue: 0, building: 0, painting: 0, decals: 0, finishing: 0, done: 0, abandoned: 0 };
+            collectionData.forEach(function(k) { if (stats[k.status] !== undefined) stats[k.status]++; });
+            var statsHtml = '<div class="progress-tracker"><h3 style="color:#ff6b6b;margin-bottom:12px;">📊 Прогресс сборки</h3><div class="stats-grid">';
+            statsHtml += '<div class="stat-mini"><div class="stat-mini-value">' + stats.queue + '</div><div class="stat-mini-label">В очереди</div></div>';
+            statsHtml += '<div class="stat-mini"><div class="stat-mini-value">' + stats.building + '</div><div class="stat-mini-label">Сборка</div></div>';
+            statsHtml += '<div class="stat-mini"><div class="stat-mini-value">' + stats.painting + '</div><div class="stat-mini-label">Покраска</div></div>';
+            statsHtml += '<div class="stat-mini"><div class="stat-mini-value">' + stats.decals + '</div><div class="stat-mini-label">Декали</div></div>';
+            statsHtml += '<div class="stat-mini"><div class="stat-mini-value">' + stats.finishing + '</div><div class="stat-mini-label">Финиш</div></div>';
+            statsHtml += '<div class="stat-mini"><div class="stat-mini-value" style="color:#00ff88;">' + stats.done + '</div><div class="stat-mini-label">Готово</div></div>';
+            statsHtml += '<div class="stat-mini"><div class="stat-mini-value" style="color:#ff4444;">' + stats.abandoned + '</div><div class="stat-mini-label">Заброшено</div></div>';
+            statsHtml += '</div></div>';
+
+            var statuses = [
+                { value: 'queue', label: '📋 В очереди', cls: 'status-queue' },
+                { value: 'building', label: '🔧 Сборка', cls: 'status-building' },
+                { value: 'painting', label: '🎨 Покраска', cls: 'status-painting' },
+                { value: 'decals', label: '🏷️ Декали', cls: 'status-decals' },
+                { value: 'finishing', label: '✨ Финиш', cls: 'status-finishing' },
+                { value: 'done', label: '✅ Готово', cls: 'status-done' },
+                { value: 'abandoned', label: '❌ Заброшено', cls: 'status-abandoned' }
+            ];
+
+            c.innerHTML = statsHtml + '<button class="clear-collection-btn" onclick="showConfirm(\'🗑️ Очистить коллекцию\',\'Вы уверены?\',function(){clearAll();})">🗑️ Очистить всё</button><div class="collection-grid">' + collectionData.map(function(k, i) {
+                var p = k.Цена || 'Цена не указана';
+                var ih = k.Фото && k.Фото.startsWith('http') ? '<img src="' + k.Фото.split(',')[0] + '" style="width:100%;height:100%;object-fit:cover;">' : '<div style="width:100%;height:100%;background:#2a2a4a;display:flex;align-items:center;justify-content:center;font-size:48px;">📦</div>';
+                var pdfH = '';
+                if (k['PDF файлы'] && k['PDF файлы'] !== 'nan' && k['PDF файлы'] !== '') {
+                    var pdfs = k['PDF файлы'].split(',');
+                    pdfH = '<div style="margin-top:8px;"><strong style="color:#ff6b6b;">📄 Инструкции:</strong>' + pdfs.map(function(url, idx) { return '<br><a href="' + url.trim() + '" target="_blank" style="color:#4488ff;text-decoration:none;">📥 Скачать ' + (pdfs.length > 1 ? (idx + 1) : '') + '</a>'; }).join('') + '</div>';
+                }
+                var statusOptions = statuses.map(function(s) { return '<option value="' + s.value + '"' + ((k.status || 'queue') === s.value ? ' selected' : '') + '>' + s.label + '</option>'; }).join('');
+                var currentStatus = statuses.find(function(s) { return s.value === (k.status || 'queue'); });
+                var isBookmarked = bookmarks.indexOf(k.Артикул) >= 0;
+                return '<div class="collection-card"><div class="card-image">' + ih + '</div><div class="card-content"><div class="card-title">' + escapeHtml(k.Название || '') + ' <button class="bookmark-btn' + (isBookmarked ? ' active' : '') + '" onclick="toggleBookmark(\'' + escapeHtml(k.Артикул) + '\',this)" title="В избранное">' + (isBookmarked ? '⭐' : '☆') + '</button></div><div class="card-details">🔢 ' + k.Артикул + ' | 📏 ' + k.Масштаб + '</div><div class="card-price">💰 ' + p + '</div><div style="display:flex;align-items:center;gap:8px;"><span class="status-label ' + (currentStatus ? currentStatus.cls : 'status-queue') + '" id="status-label-' + i + '">' + (currentStatus ? currentStatus.label : '📋 В очереди') + '</span></div><select class="status-select" onchange="updateStatus(' + i + ', this.value)" id="status-select-' + i + '">' + statusOptions + '</select>' + pdfH + '<button class="checklist-toggle" onclick="toggleChecklist(' + i + ')">📋 Чек-лист сборки</button><div class="checklist-panel" id="checklist-' + i + '"><div class="checklist-item"><input type="checkbox" onchange="updateChecklist(' + i + ',\'assembled\',this.checked)"' + (k.checklist && k.checklist.assembled ? ' checked' : '') + '><span>Детали собраны и склеены</span></div><div class="checklist-item"><input type="checkbox" onchange="updateChecklist(' + i + ',\'sanded\',this.checked)"' + (k.checklist && k.checklist.sanded ? ' checked' : '') + '><span>Зашкурено и зачищено</span></div><div class="checklist-item"><input type="checkbox" onchange="updateChecklist(' + i + ',\'puttied\',this.checked)"' + (k.checklist && k.checklist.puttied ? ' checked' : '') + '><span>Шпаклёвка и финишная шлифовка</span></div><div class="checklist-item"><input type="checkbox" onchange="updateChecklist(' + i + ',\'primed\',this.checked)"' + (k.checklist && k.checklist.primed ? ' checked' : '') + '><span>Нанесён грунт</span></div><div class="checklist-item"><input type="checkbox" onchange="updateChecklist(' + i + ',\'basecoat\',this.checked)"' + (k.checklist && k.checklist.basecoat ? ' checked' : '') + '><span>Базовый цвет нанесён</span></div><div class="checklist-item"><input type="checkbox" onchange="updateChecklist(' + i + ',\'shadows\',this.checked)"' + (k.checklist && k.checklist.shadows ? ' checked' : '') + '><span>Тени и высветления (модуляция)</span></div><div class="checklist-item"><input type="checkbox" onchange="updateChecklist(' + i + ',\'decals\',this.checked)"' + (k.checklist && k.checklist.decals ? ' checked' : '') + '><span>Декали нанесены</span></div><div class="checklist-item"><input type="checkbox" onchange="updateChecklist(' + i + ',\'wash\',this.checked)"' + (k.checklist && k.checklist.wash ? ' checked' : '') + '><span>Смывка и фильтры</span></div><div class="checklist-item"><input type="checkbox" onchange="updateChecklist(' + i + ',\'weathering\',this.checked)"' + (k.checklist && k.checklist.weathering ? ' checked' : '') + '><span>Везеринг (сколы, грязь, ржавчина)</span></div><div class="checklist-item"><input type="checkbox" onchange="updateChecklist(' + i + ',\'varnish\',this.checked)"' + (k.checklist && k.checklist.varnish ? ' checked' : '') + '><span>Финишный лак</span></div></div><div class="kit-actions"><a href="' + (k.URL || '#') + '" target="_blank" class="kit-link">🔗 На сайт Звезды</a></div><button class="remove-btn" onclick="showConfirm(\'🗑️ Удалить набор\',\'Вы уверены?\',function(){removeItem(' + i + ');})">🗑️ Удалить</button></div></div>';
+            }).join('') + '</div>';
+        }
+
+        async function updateStatus(index, newStatus) { collectionData[index].status = newStatus; var fd = new FormData(); fd.append('token', currentToken); fd.append('index', index); fd.append('status', newStatus); await fetch('/api/collection/status', { method: 'POST', body: fd }); loadCollection(); }
+        function toggleChecklist(i) { var el = document.getElementById('checklist-' + i); if (el) el.classList.toggle('active'); }
+        async function updateChecklist(index, field, value) { if (!collectionData[index].checklist) collectionData[index].checklist = {}; collectionData[index].checklist[field] = value; var fd = new FormData(); fd.append('token', currentToken); fd.append('index', index); fd.append('field', field); fd.append('value', value ? '1' : '0'); await fetch('/api/collection/checklist', { method: 'POST', body: fd }); }
+
+        function toggleBookmark(article, btn) { var idx = bookmarks.indexOf(article); if (idx >= 0) { bookmarks.splice(idx, 1); btn.classList.remove('active'); btn.textContent = '☆'; } else { bookmarks.push(article); btn.classList.add('active'); btn.textContent = '⭐'; } localStorage.setItem('bookmarks', JSON.stringify(bookmarks)); }
+
+        function renderInstructions(kits) { var grid = document.getElementById('instructionsGrid'); if (!kits || !kits.length) { grid.innerHTML = '<p style="color:#aaa;">Инструкции загружаются...</p>'; return; } var html = ''; kits.forEach(function(k) { if (k['PDF файлы'] && k['PDF файлы'] !== 'nan' && k['PDF файлы'] !== '') { var pdfs = k['PDF файлы'].split(','); pdfs.forEach(function(url, idx) { html += '<div class="instruction-card"><h4>' + escapeHtml(k.Название || 'Без названия') + '</h4><p>🔢 ' + (k.Артикул || '?') + ' | 📏 ' + (k.Масштаб || '?') + '</p><a href="' + url.trim() + '" target="_blank">📥 Скачать ' + (pdfs.length > 1 ? (idx + 1) : '') + '</a></div>'; }); } }); if (!html) html = '<p style="color:#aaa;">Инструкции не найдены</p>'; grid.innerHTML = html; }
+        function searchInstructions() { var q = document.getElementById('instructionsSearch').value.trim().toLowerCase(); var filtered = allKits.filter(function(k) { return (k.Название || '').toLowerCase().includes(q) || (k.Артикул || '').toLowerCase().includes(q); }); renderInstructions(filtered); }
+        function calculateScale() { var real = parseFloat(document.getElementById('realSize').value); var scale = parseInt(document.getElementById('scaleSelect').value); if (!real || isNaN(real)) { document.getElementById('scaleResult').textContent = 'Введите размер'; return; } var modelSize = (real * 100) / scale; document.getElementById('scaleResult').textContent = 'Размер модели: ' + modelSize.toFixed(1) + ' см'; }
+        async function removeItem(i) { await fetch('/api/collection/remove/' + i + '?token=' + currentToken, { method: 'DELETE' }); loadCollection(); }
+        async function clearAll() { await fetch('/api/collection/clear?token=' + currentToken, { method: 'DELETE' }); loadCollection(); }
+        function escapeHtml(t) { if (!t) return ''; var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+    </script>
+</body>
+</html>

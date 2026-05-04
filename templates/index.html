@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИИ-ассистент для моделистов</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <div id="toastContainer" class="toast-container"></div>
+        <div class="header">
+            <div></div>
+            <div id="authButtons" class="auth-buttons">
+                <button class="auth-btn" onclick="showAuthModal()">Войти</button>
+                <button class="auth-btn" onclick="showRegisterModal()">Регистрация</button>
+            </div>
+            <div id="userInfo" style="display: none;"></div>
+        </div>
+        <h1>🤖 ИИ-ассистент для моделистов</h1>
+        <div class="subtitle">Распознайте технику по фото и найдите подходящие наборы</div>
+        <div class="nav">
+            <a href="/" class="active">🔍 Распознавание</a>
+            <a href="/collection">📦 Коллекция</a>
+            <a href="/gallery">🎨 Галерея</a>
+            <a href="/history">📜 История</a>
+            <a href="/guide">📚 Справочник</a>
+            <a href="/about">ℹ️ О проекте</a>
+            <a href="#" id="profileNavLink" style="display: none;">👤 Профиль</a>
+        </div>
+
+        <div class="main-content">
+            <div id="initialState">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📸</div>
+                    <div class="upload-text">Нажмите или перетащите фото</div>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+            </div>
+
+            <div id="resultState" style="display: none;">
+                <div class="preview" id="preview"><img id="previewImage" alt="Preview" style="max-height: 200px; border-radius: 10px;"></div>
+                <div class="loading hidden" id="loading"><div class="spinner"></div><p>Распознавание...</p></div>
+                <div class="result" id="result">
+                    <div class="result-header"><div class="result-icon" id="resultIcon">🎯</div><div class="result-info"><h2 id="resultModel">-</h2><p>Уверенность: <span id="resultConfidence" class="confidence">-</span>%</p></div></div>
+                    <div class="top3" id="top3"></div>
+                    <div class="kits-grid" id="kitsGrid"></div>
+                </div>
+                <div class="error hidden" id="error"><p>❌ Ошибка</p></div>
+                <div class="reset-section"><button class="reset-btn" id="resetBtn">🔄 Сканировать новое фото</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="crop-overlay" id="cropOverlay">
+        <div class="crop-instructions">🖱️ Выделите область с техникой</div>
+        <div class="crop-container" id="cropContainer"><img id="cropImage" src="" alt=""><div class="crop-rect" id="cropRect"></div></div>
+        <div class="crop-buttons"><button class="crop-btn" onclick="confirmCrop()">✅ Подтвердить</button><button class="crop-btn secondary" onclick="cancelCrop()">🔄 Всё фото</button></div>
+    </div>
+
+    <div id="authModal" class="auth-modal">
+        <div class="auth-form">
+            <button class="modal-close-btn" onclick="closeAuthModal()" type="button">✕</button>
+            <h3>Вход в аккаунт</h3>
+            <input type="text" id="loginUsername" placeholder="Имя пользователя">
+            <div class="password-container"><input type="password" id="loginPassword" placeholder="Пароль"><button type="button" class="toggle-password" data-target="loginPassword">👁️</button></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #ccc;"><input type="checkbox" id="rememberMe"> Запомнить меня</label>
+            </div>
+            <button class="auth-submit-btn" onclick="login()" type="button">Войти</button>
+            <button class="auth-secondary-btn" onclick="showRegister()" type="button">Регистрация</button>
+        </div>
+    </div>
+
+    <div id="registerModal" class="auth-modal" style="display: none;">
+        <div class="auth-form">
+            <button class="modal-close-btn" onclick="closeRegisterModal()" type="button">✕</button>
+            <h3>Регистрация</h3>
+            <input type="text" id="regUsername" placeholder="Имя пользователя">
+            <div class="password-container"><input type="password" id="regPassword" placeholder="Пароль"><button type="button" class="toggle-password" data-target="regPassword">👁️</button></div>
+            <div class="password-hint">Пароль: не менее 10 символов, только латиница, минимум 1 заглавная буква</div>
+            <button class="auth-submit-btn" onclick="register()" type="button">Зарегистрироваться</button>
+            <button class="auth-secondary-btn" onclick="hideRegister()" type="button">Назад</button>
+        </div>
+    </div>
+
+    <div class="notifications-panel" id="notificationsPanel"></div>
+
+    <script src="/static/auth.js"></script>
+    <script>
+        const initialState=document.getElementById('initialState'),resultState=document.getElementById('resultState'),uploadArea=document.getElementById('uploadArea'),fileInput=document.getElementById('fileInput'),preview=document.getElementById('preview'),previewImage=document.getElementById('previewImage'),loading=document.getElementById('loading'),result=document.getElementById('result'),error=document.getElementById('error'),resetBtn=document.getElementById('resetBtn'),cropOverlay=document.getElementById('cropOverlay'),cropImage=document.getElementById('cropImage'),cropRect=document.getElementById('cropRect');
+        let cropStartX,cropStartY,cropEndX,cropEndY,isCropping=false,pendingFile=null;
+        function updateProfileNavLink(){const l=document.getElementById('profileNavLink');if(l){l.style.display=currentUser?'block':'none';if(currentUser)l.href=`/user/${currentUser}`;}}
+        const oA=window.onAuthStateChanged;window.onAuthStateChanged=function(a){if(oA)oA(a);updateProfileNavLink();};
+
+        resetBtn.addEventListener('click',()=>{initialState.style.display='block';resultState.style.display='none';result.classList.add('hidden');error.classList.add('hidden');loading.classList.add('hidden');preview.classList.add('hidden');fileInput.value='';});
+        uploadArea.onclick=()=>fileInput.click();
+        uploadArea.ondragover=e=>{e.preventDefault();uploadArea.style.borderColor='#ff6b6b';};
+        uploadArea.ondragleave=()=>{uploadArea.style.borderColor='#e94560';};
+        uploadArea.ondrop=e=>{e.preventDefault();uploadArea.style.borderColor='#e94560';const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))showCropOverlay(f);};
+        fileInput.onchange=e=>{if(fileInput.files[0])showCropOverlay(fileInput.files[0]);};
+
+        function showCropOverlay(f){pendingFile=f;const r=new FileReader();r.onload=e=>{cropImage.src=e.target.result;cropRect.style.display='none';cropOverlay.classList.add('active');};r.readAsDataURL(f);}
+        cropOverlay.querySelector('.crop-container').addEventListener('mousedown',e=>{if(e.target!==cropImage&&e.target!==cropOverlay.querySelector('.crop-container'))return;isCropping=true;const r=cropImage.getBoundingClientRect();cropStartX=(e.clientX-r.left)/r.width;cropStartY=(e.clientY-r.top)/r.height;cropRect.style.left=(cropStartX*100)+'%';cropRect.style.top=(cropStartY*100)+'%';cropRect.style.width='0';cropRect.style.height='0';cropRect.style.display='block';});
+        cropOverlay.querySelector('.crop-container').addEventListener('mousemove',e=>{if(!isCropping)return;const r=cropImage.getBoundingClientRect();cropEndX=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));cropEndY=Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));const l=Math.min(cropStartX,cropEndX)*100,t=Math.min(cropStartY,cropEndY)*100,w=Math.abs(cropEndX-cropStartX)*100,h=Math.abs(cropEndY-cropStartY)*100;cropRect.style.left=l+'%';cropRect.style.top=t+'%';cropRect.style.width=w+'%';cropRect.style.height=h+'%';});
+        cropOverlay.querySelector('.crop-container').addEventListener('mouseup',()=>{isCropping=false;});
+        function confirmCrop(){const h=cropRect.style.display!=='none'&&parseFloat(cropRect.style.width)>2;cropOverlay.classList.remove('active');processFile(pendingFile,h?{x:parseFloat(cropRect.style.left)/100,y:parseFloat(cropRect.style.top)/100,w:parseFloat(cropRect.style.width)/100,h:parseFloat(cropRect.style.height)/100}:null);}
+        function cancelCrop(){cropOverlay.classList.remove('active');processFile(pendingFile,null);}
+
+        async function processFile(file,cropData){
+            initialState.style.display='none';resultState.style.display='block';
+            if(cropData){const b=await createImageBitmap(file);const c=document.createElement('canvas');c.width=Math.round(b.width*cropData.w);c.height=Math.round(b.height*cropData.h);const ctx=c.getContext('2d');ctx.drawImage(b,Math.round(b.width*cropData.x),Math.round(b.height*cropData.y),c.width,c.height,0,0,c.width,c.height);const bl=await new Promise(r=>c.toBlob(r,'image/jpeg',0.95));file=new File([bl],'cropped.jpg',{type:'image/jpeg'});}
+            const reader=new FileReader();reader.onload=e=>{previewImage.src=e.target.result;preview.classList.remove('hidden');};reader.readAsDataURL(file);
+            result.classList.add('hidden');error.classList.add('hidden');loading.classList.remove('hidden');
+            const fd=new FormData();fd.append('file',file);if(currentToken)fd.append('token',currentToken);
+            try{const resp=await fetch('/predict',{method:'POST',body:fd});const data=await resp.json();loading.classList.add('hidden');if(data.error){error.classList.remove('hidden');return;}result.classList.remove('hidden');displayResult(data);}catch(ex){loading.classList.add('hidden');error.classList.remove('hidden');}
+        }
+
+        async function addToCollection(kit){if(!currentToken){showToast('Войдите','','warning');showAuthModal();return;}try{const r=await fetch('/api/collection/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:currentToken,kit})});const d=await r.json();if(d.success)showToast('✅','Добавлено!','success');else if(d.error==='duplicate')showToast('📦','Уже в коллекции','warning');}catch(e){}}
+        function displayResult(data){
+            document.getElementById('resultModel').textContent=data.model_name;document.getElementById('resultConfidence').textContent=data.confidence;document.getElementById('resultIcon').textContent=data.confidence>=80?'🎯':data.confidence>=50?'👍':'🤔';
+            const t3=document.getElementById('top3');t3.innerHTML='';if(data.top3)data.top3.forEach(i=>{const d=document.createElement('div');d.className='top3-item';d.innerHTML=`<div><strong>${escapeHtml(i[0])}</strong></div><div style="color:${i[1]>=50?'#00ff88':'#ffaa00'}">${i[1]}%</div>`;t3.appendChild(d);});
+            const kg=document.getElementById('kitsGrid');kg.innerHTML='';if(data.kits&&data.kits.length)data.kits.forEach(k=>{const c=document.createElement('div');c.className='kit-card';const p=k.Цена||'Цена не указана';let ih='';if(k.Фото&&k.Фото.startsWith('http'))ih=`<img src="${k.Фото.split(',')[0]}" style="width:100%;height:100%;object-fit:cover;">`;else ih='<div style="width:100%;height:100%;background:#2a2a4a;display:flex;align-items:center;justify-content:center;font-size:48px;">📦</div>';const kj=JSON.stringify(k).replace(/'/g,"\\'").replace(/"/g,'&quot;');c.innerHTML=`<div style="height:160px;overflow:hidden;">${ih}</div><div class="kit-content"><div class="kit-name">${escapeHtml(k.Название||'')}</div><div class="kit-details">🔢 ${k.Артикул||'?'} | 📏 ${k.Масштаб||'?'}</div><div class="kit-price">💰 ${p}</div><div class="kit-actions"><a href="${k.URL||'#'}" target="_blank" class="kit-link">🔗 На сайт Звезды</a><button class="kit-add" onclick="addToCollection(${kj})">➕ В коллекцию</button></div></div>`;kg.appendChild(c);});else kg.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;">🔍 Наборы не найдены</div>';
+        }
+        function escapeHtml(t){if(!t)return'';const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
+        document.addEventListener('DOMContentLoaded',()=>{updateProfileNavLink();});
+    </script>
+</body>
+</html>

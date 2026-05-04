@@ -1,0 +1,50 @@
+[
+  {
+    "timestamp": "2026-04-20T16:15:14.901065",
+    "model_name": "КВ-1",
+    "icon": "🐅",
+    "confidence": 100.0
+  },
+  {
+    "timestamp": "2026-04-20T16:14:53.912955",
+    "model_name": "КВ-1",
+    "icon": "🐅",
+    "confidence": 100.0
+  },
+  {
+    "timestamp": "2026-04-15T17:38:35.209055",
+    "model_name": "Tiger I",
+    "icon": "🐅",
+    "confidence": 100.0
+  },
+  {
+    "timestamp": "2026-04-15T17:38:17.225122",
+    "model_name": "Bf-109",
+    "icon": "✈️",
+    "confidence": 100.0
+  },
+  {
+    "timestamp": "2026-04-15T17:38:05.200006",
+    "model_name": "M4 Sherman",
+    "icon": "🐅",
+    "confidence": 100.0
+  },
+  {
+    "timestamp": "2026-04-15T17:37:58.938504",
+    "model_name": "КВ-1",
+    "icon": "🐅",
+    "confidence": 100.0
+  },
+  {
+    "timestamp": "2026-04-15T17:37:48.830379",
+    "model_name": "Tiger I",
+    "icon": "🐅",
+    "confidence": 100.0
+  },
+  {
+    "timestamp": "2026-04-15T16:56:07.165828",
+    "model_name": "Tiger I",
+    "icon": "🐅",
+    "confidence": 100.0
+  }
+]

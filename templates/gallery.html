@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Галерея — ИИ-ассистент для моделистов</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <div id="toastContainer" class="toast-container"></div>
+        <div class="header"><div></div><div id="authButtons" class="auth-buttons"><button class="auth-btn" onclick="showAuthModal()">Войти</button><button class="auth-btn" onclick="showRegisterModal()">Регистрация</button></div><div id="userInfo" style="display:none;"></div></div>
+        <h1>🎨 Галерея работ</h1><div class="subtitle">Работы моделистов</div>
+        <div class="nav"><a href="/">🔍 Распознавание</a><a href="/collection">📦 Коллекция</a><a href="/gallery" class="active">🎨 Галерея</a><a href="/history">📜 История</a><a href="/guide">📚 Справочник</a><a href="/about">ℹ️ О проекте</a><a href="#" id="profileNavLink" style="display:none;">👤 Профиль</a></div>
+        <button id="showUploadBtn" class="gallery-filter-btn" onclick="toggleUploadForm()" style="display:none;">📸 Загрузить работу</button>
+        <div class="gallery-upload-form" id="uploadForm"><h3>📸 Загрузить работу</h3><input type="text" id="uploadTitle" placeholder="Название"><input type="text" id="uploadModel" placeholder="Модель"><input type="text" id="uploadScale" placeholder="Масштаб"><textarea id="uploadDesc" placeholder="Описание"></textarea><div class="file-label" onclick="document.getElementById('uploadFile').click()">📁 Выбрать фото</div><input type="file" id="uploadFile" accept="image/*" multiple onchange="previewUpload()"><div class="preview-grid" id="uploadPreviewGrid"></div><button class="submit-btn" onclick="submitWork()">Опубликовать</button></div>
+        <div id="galleryGrid" class="gallery-grid"><div class="empty-gallery">Загрузка...</div></div>
+    </div>
+    <div id="imageModal" class="modal" onclick="closeModal()"><span class="modal-close">&times;</span><img id="modalImage" src="" alt=""></div>
+    <div id="authModal" class="auth-modal"><div class="auth-form"><button class="modal-close-btn" onclick="closeAuthModal()" type="button">✕</button><h3>Вход в аккаунт</h3><input type="text" id="loginUsername" placeholder="Имя пользователя"><div class="password-container"><input type="password" id="loginPassword" placeholder="Пароль"><button type="button" class="toggle-password" data-target="loginPassword">👁️</button></div><div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0;"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#ccc;"><input type="checkbox" id="rememberMe"> Запомнить меня</label></div><button class="auth-submit-btn" onclick="login()" type="button">Войти</button><button class="auth-secondary-btn" onclick="showRegister()" type="button">Регистрация</button></div></div>
+    <div id="registerModal" class="auth-modal" style="display:none;"><div class="auth-form"><button class="modal-close-btn" onclick="closeRegisterModal()" type="button">✕</button><h3>Регистрация</h3><input type="text" id="regUsername" placeholder="Имя пользователя"><div class="password-container"><input type="password" id="regPassword" placeholder="Пароль"><button type="button" class="toggle-password" data-target="regPassword">👁️</button></div><div class="password-hint">Пароль: не менее 10 символов, только латиница, минимум 1 заглавная буква</div><button class="auth-submit-btn" onclick="register()" type="button">Зарегистрироваться</button><button class="auth-secondary-btn" onclick="hideRegister()" type="button">Назад</button></div></div>
+    <div class="notifications-panel" id="notificationsPanel"></div>
+    <script src="/static/auth.js"></script>
+    <script>
+        function escapeHtml(t) { if (!t) return ''; var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+        var origUI = window.updateUI; window.updateUI = function() { if (origUI) origUI(); var b = document.getElementById('showUploadBtn'); if (b) b.style.display = currentUser && currentToken ? 'inline-block' : 'none'; };
+        function onAuthStateChanged() {}
+
+        function toggleUploadForm() { if (!currentToken) { showToast('Войдите', '', 'warning'); showAuthModal(); return; } document.getElementById('uploadForm').classList.toggle('active'); }
+        function previewUpload() { var grid = document.getElementById('uploadPreviewGrid'); grid.innerHTML = ''; Array.from(document.getElementById('uploadFile').files).forEach(function(f) { var r = new FileReader(); r.onload = function(e) { var img = document.createElement('img'); img.src = e.target.result; grid.appendChild(img); }; r.readAsDataURL(f); }); }
+        async function submitWork() { if (!currentToken) { showToast('Войдите', '', 'warning'); showAuthModal(); return; } var t = document.getElementById('uploadTitle').value.trim(), m = document.getElementById('uploadModel').value.trim(), s = document.getElementById('uploadScale').value.trim(), d = document.getElementById('uploadDesc').value.trim(), files = document.getElementById('uploadFile').files; if (!t || !m || !s) { showToast('Ошибка', 'Заполните поля', 'error'); return; } var fd = new FormData(); fd.append('token', currentToken); fd.append('title', t); fd.append('model_name', m); fd.append('scale', s); fd.append('description', d); Array.from(files).forEach(function(f) { fd.append('files', f); }); var j = await (await fetch('/api/gallery/add-multiple', { method: 'POST', body: fd })).json(); if (j.success) { showToast('✅', 'Опубликовано!', 'success'); location.reload(); } else showToast('❌', j.error || 'Ошибка', 'error'); }
+
+        function createSlider(images) { if (!images || images.length <= 1) return '<img src="' + (images && images.length ? images[0] : '') + '" class="gallery-image" onclick="openImage(\'' + (images && images.length ? images[0] : '') + '\')">'; var h = '<div class="slider-container"><div class="slider-images">'; images.forEach(function(i) { h += '<img src="' + i + '" onclick="openImage(\'' + i + '\')">'; }); h += '</div><button class="slider-btn slider-prev" onclick="event.stopPropagation();slideGallery(this,-1)">‹</button><button class="slider-btn slider-next" onclick="event.stopPropagation();slideGallery(this,1)">›</button></div><div class="slider-dots">'; images.forEach(function(_, i) { h += '<div class="slider-dot' + (i === 0 ? ' active' : '') + '" onclick="event.stopPropagation();goToSlide(this,' + i + ')"></div>'; }); h += '</div>'; return h; }
+        window.slideGallery = function(b, d) { var s = b.parentElement.querySelector('.slider-images'), t = b.parentElement.nextElementSibling.querySelectorAll('.slider-dot'), c = parseInt(s.dataset.current || 0); c = (c + d + t.length) % t.length; s.style.transform = 'translateX(-' + (c * 100) + '%)'; s.dataset.current = c; t.forEach(function(d, i) { d.classList.toggle('active', i === c); }); };
+        window.goToSlide = function(d, i) { var s = d.parentElement.previousElementSibling.querySelector('.slider-images'), t = d.parentElement.querySelectorAll('.slider-dot'); s.style.transform = 'translateX(-' + (i * 100) + '%)'; s.dataset.current = i; t.forEach(function(d, j) { d.classList.toggle('active', j === i); }); };
+
+        function formatTime(ts) { var d = Date.now() - new Date(ts).getTime(); if (d < 60000) return 'только что'; if (d < 3600000) return Math.floor(d / 60000) + ' мин.'; if (d < 86400000) return Math.floor(d / 3600000) + ' ч.'; return new Date(ts).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }); }
+
+        function buildCommentTree(comments, imageId) {
+            if (!comments || !comments.length) return '';
+            var commentMap = {};
+            var roots = [];
+            comments.forEach(function(c) {
+                c._id = c.id || c.username + '_' + c.created_at;
+                commentMap[c._id] = { comment: c, children: [] };
+            });
+            comments.forEach(function(c) {
+                if (c.reply_to && commentMap[c.reply_to]) {
+                    commentMap[c.reply_to].children.push(commentMap[c._id]);
+                } else {
+                    roots.push(commentMap[c._id]);
+                }
+            });
+            function render(node, level) {
+                var c = node.comment, ml = level * 24, html = '';
+                html += '<div class="comment-item" style="margin-left:' + ml + 'px;' + (level > 0 ? 'border-left:2px solid rgba(233,69,96,0.3);' : '') + '">';
+                html += '<div><a href="/user/' + escapeHtml(c.username) + '" class="comment-author-link" onclick="event.stopPropagation()">@' + escapeHtml(c.username) + '</a><span style="font-size:0.7rem;color:#666;margin-left:8px;">' + formatTime(c.created_at) + '</span>';
+                if (c.reply_to) { var parent = comments.find(function(p) { return p.id === c.reply_to; }); if (parent) html += ' <span style="font-size:0.7rem;color:#888;">↳ ответ @' + escapeHtml(parent.username) + '</span>'; }
+                html += '</div><div style="margin-top:4px;color:#ccc;">' + escapeHtml(c.text) + '</div>';
+                html += '<button class="reply-btn" onclick="event.stopPropagation();toggleReplyForm(this)">💬 Ответить</button>';
+                html += '<div class="reply-form"><input type="text" class="reply-input" placeholder="Ответ..."><button class="reply-submit" onclick="event.stopPropagation();submitReply(' + imageId + ',\'' + escapeHtml(c._id) + '\',this)">→</button></div>';
+                node.children.forEach(function(ch) { html += render(ch, level + 1); });
+                html += '</div>'; return html;
+            }
+            return roots.map(function(r) { return render(r, 0); }).join('');
+        }
+
+        function toggleReplyForm(btn) { var f = btn.nextElementSibling; if (!f) return; f.classList.toggle('active'); if (f.classList.contains('active')) f.querySelector('input').focus(); }
+
+        async function submitReply(imageId, replyId, btn) {
+            if (!currentToken) { showToast('Войдите', '', 'warning'); showAuthModal(); return; }
+            var inp = btn.parentElement.querySelector('.reply-input'), t = inp.value.trim();
+            if (!t) return;
+            var fd = new FormData(); fd.append('token', currentToken); fd.append('comment', t); fd.append('reply_to', replyId);
+            await fetch('/api/gallery/comment/' + imageId, { method: 'POST', body: fd });
+            location.reload();
+        }
+
+        async function loadGallery() {
+            var c = document.getElementById('galleryGrid');
+            try {
+                var g = await (await fetch('/api/gallery')).json();
+                if (!g || !g.length) { c.innerHTML = '<div class="empty-gallery">🎨 Пока нет работ</div>'; return; }
+                var likes = new Set();
+                if (currentToken) { try { likes = new Set(await (await fetch('/api/gallery/user-likes?token=' + currentToken)).json()); } catch (e) { } }
+                c.innerHTML = g.map(function(item) {
+                    var isL = likes.has(item.id), images = item.images || (item.image ? [item.image] : []);
+                    return '<div class="gallery-card">' + createSlider(images) +
+                        '<div class="gallery-content"><div class="gallery-title">' + escapeHtml(item.title) + '</div><div class="gallery-meta">✈️ ' + escapeHtml(item.model_name) + ' | 📏 ' + escapeHtml(item.scale) + ' | 👤 <a href="/user/' + escapeHtml(item.username) + '" style="color:#ff6b6b;">@' + escapeHtml(item.username) + '</a></div>' +
+                        '<div class="gallery-description">' + escapeHtml(item.description || '') + '</div>' +
+                        '<div class="gallery-actions"><a href="#" onclick="return likeIt(' + item.id + ',' + isL + ')" style="color:#ccc;text-decoration:none;margin-right:15px;">' + (isL ? '❤️' : '🤍') + ' ' + (item.likes || 0) + '</a><span style="color:#ccc;">💬 ' + (item.comments || []).length + '</span></div>' +
+                        '<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);">' + buildCommentTree(item.comments || [], item.id) + '</div>' +
+                        '<div style="margin-top:10px;display:flex;gap:5px;"><input type="text" id="comment-input-' + item.id + '" class="comment-input" placeholder="Комментарий..."><button class="comment-submit" onclick="addComment(' + item.id + ')">Отправить</button></div>' +
+                        '</div></div>';
+                }).join('');
+            } catch (e) { c.innerHTML = '<div class="empty-gallery">❌ Ошибка</div>'; }
+        }
+
+        function likeIt(id, isL) { if (!currentToken) { showToast('Войдите', '', 'warning'); showAuthModal(); return false; } var u = isL ? '/api/gallery/unlike/' + id : '/api/gallery/like/' + id; var f = new FormData(); f.append('token', currentToken); fetch(u, { method: 'POST', body: f }).then(function() { location.reload(); }); return false; }
+        async function addComment(id) { if (!currentToken) { showToast('Войдите', '', 'warning'); showAuthModal(); return false; } var i = document.getElementById('comment-input-' + id); if (!i) return false; var t = i.value.trim(); if (!t) return false; var f = new FormData(); f.append('token', currentToken); f.append('comment', t); await fetch('/api/gallery/comment/' + id, { method: 'POST', body: f }); location.reload(); return false; }
+
+        function openImage(s) { document.getElementById('modalImage').src = s; document.getElementById('imageModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('imageModal').style.display = 'none'; }
+        document.getElementById('imageModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+        loadGallery();
+    </script>
+</body>
+</html>

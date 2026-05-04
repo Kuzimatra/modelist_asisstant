@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль — ИИ-ассистент для моделистов</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .reply-btn { background: transparent; border: none; color: #888; cursor: pointer; font-size: 0.7rem; margin-left: 10px; }
+        .reply-btn:hover { color: #ff6b6b; }
+        .reply-form { margin-top: 5px; margin-left: 24px; display: none; gap: 6px; }
+        .reply-form.active { display: flex; }
+        .reply-input { flex: 1; padding: 6px 10px; border-radius: 14px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 0.85rem; }
+        .reply-submit { background: #e94560; border: none; color: white; padding: 6px 12px; border-radius: 14px; cursor: pointer; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="toastContainer" class="toast-container"></div>
+        <div class="header"><div><a href="/" class="back-link">← На главную</a></div><div id="authButtons" class="auth-buttons"><button class="auth-btn" onclick="showAuthModal()">Войти</button><button class="auth-btn" onclick="showRegisterModal()">Регистрация</button></div><div id="userInfo" style="display:none;"></div></div>
+        <div id="profileContent"><div class="loading"><div class="spinner"></div><p>Загрузка...</p></div></div>
+    </div>
+    <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+    <div id="imageModal" class="modal" onclick="closeModal()"><span class="modal-close">&times;</span><img id="modalImage" src="" alt=""></div>
+    <div id="authModal" class="auth-modal"><div class="auth-form"><button class="modal-close-btn" onclick="closeAuthModal()" type="button">✕</button><h3>Вход в аккаунт</h3><input type="text" id="loginUsername" placeholder="Имя пользователя"><div class="password-container"><input type="password" id="loginPassword" placeholder="Пароль"><button type="button" class="toggle-password" data-target="loginPassword">👁️</button></div><div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0;"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#ccc;"><input type="checkbox" id="rememberMe"> Запомнить меня</label></div><button class="auth-submit-btn" onclick="login()" type="button">Войти</button><button class="auth-secondary-btn" onclick="showRegister()" type="button">Регистрация</button></div></div>
+    <div id="registerModal" class="auth-modal" style="display:none;"><div class="auth-form"><button class="modal-close-btn" onclick="closeRegisterModal()" type="button">✕</button><h3>Регистрация</h3><input type="text" id="regUsername" placeholder="Имя пользователя"><div class="password-container"><input type="password" id="regPassword" placeholder="Пароль"><button type="button" class="toggle-password" data-target="regPassword">👁️</button></div><div class="password-hint">Пароль: не менее 10 символов, только латиница, минимум 1 заглавная буква</div><button class="auth-submit-btn" onclick="register()" type="button">Зарегистрироваться</button><button class="auth-secondary-btn" onclick="hideRegister()" type="button">Назад</button></div></div>
+    <div class="notifications-panel" id="notificationsPanel"></div>
+    <script src="/static/auth.js"></script>
+    <script>
+        var username = window.location.pathname.split('/').pop();
+        var profileData = null;
+        var avatarMenuVisible = false;
+
+        function onAuthStateChanged(a) { loadProfile(); }
+
+        async function loadProfile() {
+            var c = document.getElementById('profileContent');
+            try {
+                var r = await fetch('/api/user/profile/' + username);
+                if (!r.ok) { c.innerHTML = '<div class="empty-state"><h3>Пользователь не найден</h3></div>'; return; }
+                profileData = await r.json();
+                renderProfile(profileData);
+            } catch (e) { c.innerHTML = '<div class="empty-state">❌ Ошибка загрузки</div>'; }
+        }
+
+        function formatTime(ts) { var d = Date.now() - new Date(ts).getTime(); if (d < 60000) return 'только что'; if (d < 3600000) return Math.floor(d / 60000) + ' мин.'; if (d < 86400000) return Math.floor(d / 3600000) + ' ч.'; return new Date(ts).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }); }
+
+        function buildCommentTree(comments, imageId) {
+            if (!comments || !comments.length) return '';
+            comments.forEach(function(c) { c._id = c.id || c.username + '_' + c.created_at; });
+            var roots = [], replies = {};
+            comments.forEach(function(c) { if (!c.reply_to) roots.push(c); else { if (!replies[c.reply_to]) replies[c.reply_to] = []; replies[c.reply_to].push(c); } });
+            function render(comment, level) {
+                var ml = level * 24, children = replies[comment._id] || [], html = '';
+                html += '<div class="comment-item" style="margin-left:' + ml + 'px;' + (level > 0 ? 'border-left:2px solid rgba(233,69,96,0.3);' : '') + '">';
+                html += '<div><a href="/user/' + escapeHtml(comment.username) + '" class="comment-author">@' + escapeHtml(comment.username) + '</a><span class="comment-time">' + formatTime(comment.created_at) + '</span>';
+                if (comment.reply_to) { var p = comments.find(function(x) { return x._id === comment.reply_to || x.id === comment.reply_to; }); if (p) html += ' <span style="font-size:0.7rem;color:#888;">↳ @' + escapeHtml(p.username) + '</span>'; }
+                html += '</div><div style="margin-top:4px;color:#ccc;">' + escapeHtml(comment.text) + '</div>';
+                if (currentUser) {
+                    html += '<button class="reply-btn" onclick="event.stopPropagation();toggleReplyForm(this)">💬 Ответить</button>';
+                    html += '<div class="reply-form"><input type="text" class="reply-input" placeholder="Ответ..."><button class="reply-submit" onclick="event.stopPropagation();submitProfileReply(' + imageId + ',\'' + escapeHtml(comment._id) + '\',this)">→</button></div>';
+                }
+                children.forEach(function(ch) { html += render(ch, level + 1); });
+                html += '</div>'; return html;
+            }
+            return roots.map(function(r) { return render(r, 0); }).join('');
+        }
+
+        function toggleReplyForm(btn) { var f = btn.nextElementSibling; if (!f) return; f.classList.toggle('active'); if (f.classList.contains('active')) f.querySelector('input').focus(); }
+
+        async function submitProfileReply(imageId, replyId, btn) {
+            if (!currentToken) { showToast('Войдите', '', 'warning'); showAuthModal(); return; }
+            var inp = btn.parentElement.querySelector('.reply-input'), t = inp.value.trim();
+            if (!t) return;
+            var fd = new FormData(); fd.append('token', currentToken); fd.append('comment', t); fd.append('reply_to', replyId);
+            await fetch('/api/gallery/comment/' + imageId, { method: 'POST', body: fd });
+            inp.value = ''; btn.parentElement.classList.remove('active');
+            loadProfile();
+        }
+
+        function toggleAvatarMenu() { var m = document.getElementById('avatarMenu'); if (m) { avatarMenuVisible = !avatarMenuVisible; m.classList.toggle('show', avatarMenuVisible); } }
+        function triggerAvatarUpload() { document.getElementById('avatarInput').click(); toggleAvatarMenu(); }
+
+        async function handleAvatarUpload(e) { var f = e.target.files[0]; if (!f) return; var fd = new FormData(); fd.append('token', currentToken); fd.append('file', f); var r = await fetch('/api/user/avatar', { method: 'POST', body: fd }); var d = await r.json(); if (d.success) { showToast('✅', 'Аватар обновлен', 'success'); loadProfile(); if (typeof loadUserAvatar === 'function') { await loadUserAvatar(currentUser); updateUI(); } } e.target.value = ''; }
+        async function deleteAvatar() { if (!confirm('Удалить аватар?')) return; var fd = new FormData(); fd.append('token', currentToken); await fetch('/api/user/avatar', { method: 'DELETE', body: fd }); showToast('✅', 'Аватар удален', 'success'); loadProfile(); currentUserAvatar = null; updateUI(); toggleAvatarMenu(); }
+
+        function renderProfile(data) {
+            var c = document.getElementById('profileContent'), u = data.username, s = data.stats, w = data.works || [], av = data.avatar, al = u.charAt(0).toUpperCase(), isOwn = currentUser === u, createdDateStr = '';
+            if (data.created_at) { var dt = new Date(data.created_at); createdDateStr = dt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }); }
+            var sortedWorks = [].concat(w).sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+            var html = '<div class="profile-header"><div class="profile-avatar-container">' + (av ? '<img src="' + av + '" class="profile-avatar" alt="' + escapeHtml(u) + '">' : '<div class="profile-avatar">' + al + '</div>') + (isOwn ? '<div class="avatar-edit-btn" onclick="toggleAvatarMenu()">📷</div><div class="avatar-menu" id="avatarMenu"><div class="avatar-menu-item" onclick="triggerAvatarUpload()">📤 Загрузить</div>' + (av ? '<div class="avatar-menu-item danger" onclick="deleteAvatar()">🗑️ Удалить</div>' : '') + '</div>' : '') + '</div><div class="profile-info"><div class="profile-username">@' + escapeHtml(u) + '</div><div class="profile-meta">' + (createdDateStr ? '📅 На сайте с ' + createdDateStr : '') + '</div><div class="profile-stats"><div class="profile-stat"><div class="profile-stat-value">' + (s.works_count || 0) + '</div><div class="profile-stat-label">Работ</div></div><div class="profile-stat"><div class="profile-stat-value">' + (s.total_likes || 0) + '</div><div class="profile-stat-label">Лайков</div></div><div class="profile-stat"><div class="profile-stat-value">' + (s.recognitions_count || 0) + '</div><div class="profile-stat-label">Распознаваний</div></div><div class="profile-stat"><div class="profile-stat-value">' + (s.unique_models || 0) + '</div><div class="profile-stat-label">Моделей</div></div><div class="profile-stat"><div class="profile-stat-value">' + (s.collection_count || 0) + '</div><div class="profile-stat-label">В коллекции</div></div></div>' + (isOwn ? '<div class="profile-actions"><a href="/collection" class="profile-btn">📦 Коллекция</a><a href="/history" class="profile-btn">📜 История</a></div>' : '') + '</div></div>';
+            html += '<div class="profile-section"><div class="profile-section-title">🎨 Работы (' + w.length + ')</div>';
+            if (sortedWorks.length > 0) { html += '<div class="profile-works-grid">'; sortedWorks.forEach(function(wk) { html += '<div class="work-card"><img src="' + wk.image + '" class="work-image" onclick="openImage(\'' + wk.image + '\')" alt="' + escapeHtml(wk.title) + '"><div class="work-info"><div class="work-title">' + escapeHtml(wk.title) + '</div><div class="work-meta"><span>✈️ ' + escapeHtml(wk.model_name) + ' | 📏 ' + escapeHtml(wk.scale) + '</span><span class="work-likes">❤️ ' + (wk.likes || 0) + '</span></div>' + (wk.description ? '<div style="color:#ccc;font-size:0.9rem;">' + escapeHtml(wk.description) + '</div>' : '') + '<div class="work-comments"><div class="work-comments-title">💬 ' + (wk.comments || []).length + ' комментариев</div>' + buildCommentTree(wk.comments || [], wk.id) + '</div></div></div>'; }); html += '</div>'; } else { html += '<div class="empty-state">🎨 Пока нет работ</div>'; }
+            html += '</div>';
+            c.innerHTML = html;
+        }
+
+        function openImage(s) { document.getElementById('modalImage').src = s; document.getElementById('imageModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('imageModal').style.display = 'none'; }
+        function escapeHtml(t) { if (!t) return ''; var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+        document.getElementById('imageModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+        document.getElementById('avatarInput').addEventListener('change', handleAvatarUpload);
+        loadProfile();
+    </script>
+</body>
+</html>
